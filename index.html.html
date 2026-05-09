@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forni Car — Sin fallos al acelerar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00D4E8;
+    --cyan-dark: #00A8BC;
+    --black: #0a0a0a;
+    --gray-dark: #111111;
+    --gray-mid: #1c1c1c;
+    --gray-light: #2a2a2a;
+    --white: #f5f5f5;
+    --text-muted: #888;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,212,232,0.15);
+    transition: background 0.3s;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--cyan); }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--cyan); }
+
+  .nav-cta {
+    background: var(--cyan);
+    color: var(--black) !important;
+    padding: 0.55rem 1.4rem;
+    border-radius: 3px;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em;
+    transition: background 0.2s !important;
+  }
+
+  .nav-cta:hover { background: var(--cyan-dark) !important; color: var(--black) !important; }
+
+  /* HERO */
+  #hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(105deg, rgba(10,10,10,0.95) 40%, rgba(10,10,10,0.5) 100%),
+      url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1600&q=80') center/cover no-repeat;
+  }
+
+  .dot-grid {
+    position: absolute;
+    top: 0; left: 0;
+    width: 480px; height: 480px;
+    background-image: radial-gradient(circle, rgba(0,212,232,0.25) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .stripe-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 320px; height: 18px;
+    background: repeating-linear-gradient(
+      -55deg,
+      var(--cyan) 0px,
+      var(--cyan) 12px,
+      transparent 12px,
+      transparent 24px
+    );
+    opacity: 0.85;
+  }
+
+  .stripe-bar-top {
+    position: absolute;
+    top: 0; right: 0;
+    width: 320px; height: 18px;
+    background: repeating-linear-gradient(
+      -55deg,
+      var(--cyan) 0px,
+      var(--cyan) 12px,
+      transparent 12px,
+      transparent 24px
+    );
+    opacity: 0.85;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 4rem;
+    max-width: 720px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: var(--cyan);
+    color: var(--black);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.9rem;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: 0.03em;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title .line2 { color: var(--cyan); }
+
+  .hero-slogan {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .hero-slogan em { color: var(--white); font-style: normal; font-weight: 600; }
+
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--black);
+    padding: 0.85rem 2.2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--cyan-dark); transform: translateY(-2px); }
+
+  .btn-outline {
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    padding: 0.85rem 2.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+  .hero-stats {
+    position: absolute;
+    bottom: 4rem; right: 4rem;
+    display: flex;
+    gap: 2.5rem;
+    z-index: 2;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--cyan);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 4px;
+  }
+
+  /* SECTION SHARED */
+  section { padding: 6rem 4rem; }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 5rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 520px;
+    line-height: 1.7;
+  }
+
+  /* SERVICES */
+  #servicios { background: var(--gray-dark); }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5px;
+    margin-top: 3.5rem;
+    border: 1.5px solid var(--gray-light);
+  }
+
+  .service-card {
+    background: var(--gray-mid);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.25s;
+    cursor: default;
+  }
+
+  .service-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--cyan);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .service-card:hover { background: #1f1f1f; }
+  .service-card:hover::after { transform: scaleX(1); }
+
+  .svc-icon {
+    width: 48px; height: 48px;
+    border: 1.5px solid rgba(0,212,232,0.4);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+  }
+
+  .svc-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .svc-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin-bottom: 1.2rem;
+  }
+
+  .svc-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--cyan);
+    letter-spacing: 0.04em;
+  }
+
+  .svc-price small {
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* REVISIONES */
+  #revisiones { background: var(--black); }
+
+  .rev-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 3.5rem;
+  }
+
+  @media (max-width: 768px) { .rev-container { grid-template-columns: 1fr; } }
+
+  .rev-card {
+    background: var(--gray-mid);
+    padding: 3rem 2.5rem;
+    position: relative;
+    transition: background 0.25s;
+  }
+
+  .rev-card.featured {
+    background: var(--cyan);
+  }
+
+  .rev-card.featured .rev-title,
+  .rev-card.featured .rev-price,
+  .rev-card.featured .inc-item { color: var(--black); }
+
+  .rev-card.featured .rev-badge { background: var(--black); color: var(--cyan); }
+  .rev-card.featured .inc-item::before { color: var(--black); }
+  .rev-card.featured .rev-desc { color: rgba(0,0,0,0.6); }
+
+  .rev-badge {
+    display: inline-block;
+    background: var(--cyan);
+    color: var(--black);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  .rev-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+
+  .rev-desc {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .rev-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 2rem;
+  }
+
+  .inc-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .inc-item {
+    font-size: 0.9rem;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .inc-item::before {
+    content: '✓';
+    color: var(--cyan);
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  /* NEUMÁTICOS */
+  #neumaticos { background: var(--gray-dark); }
+
+  .tyre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+
+  .tyre-card {
+    border: 1.5px solid var(--gray-light);
+    padding: 2rem 1.5rem;
+    transition: border-color 0.25s, transform 0.2s;
+  }
+
+  .tyre-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-4px);
+  }
+
+  .tyre-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+
+  .tyre-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 1rem;
+  }
+
+  .tyre-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tyre-features li {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding-left: 0.8rem;
+    border-left: 2px solid var(--gray-light);
+  }
+
+  .tyre-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    color: var(--white);
+  }
+
+  .tyre-price span {
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* TIENDA */
+  #tienda { background: var(--black); }
+
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 3.5rem;
+  }
+
+  .shop-item {
+    background: var(--gray-mid);
+    padding: 1.5rem;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .shop-item:hover {
+    border-color: rgba(0,212,232,0.3);
+    transform: translateY(-2px);
+  }
+
+  .shop-emoji { font-size: 2rem; margin-bottom: 0.75rem; }
+
+  .shop-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .shop-price {
+    color: var(--cyan);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  /* SOBRE NOSOTROS */
+  #nosotros {
+    background: var(--gray-dark);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    #nosotros { grid-template-columns: 1fr; padding: 4rem 2rem; }
+  }
+
+  .about-img-wrap {
+    position: relative;
+  }
+
+  .about-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+  }
+
+  .about-accent {
+    position: absolute;
+    bottom: -16px; right: -16px;
+    width: 120px; height: 120px;
+    background: var(--cyan);
+    z-index: -1;
+  }
+
+  .about-tag-inline {
+    display: inline-block;
+    background: var(--cyan);
+    color: var(--black);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+  }
+
+  .team-list {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .team-pill {
+    border: 1px solid var(--gray-light);
+    padding: 0.5rem 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  .team-pill strong { color: var(--cyan); display: block; font-size: 0.72rem; margin-top: 2px; }
+
+  /* CONTACTO */
+  #contacto { background: var(--black); }
+
+  .contact-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 5rem;
+    margin-top: 3.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) { .contact-wrap { grid-template-columns: 1fr; gap: 3rem; } }
+
+  .contact-info { display: flex; flex-direction: column; gap: 2rem; }
+
+  .c-item { display: flex; flex-direction: column; gap: 0.3rem; }
+
+  .c-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+
+  .c-value {
+    font-size: 1.05rem;
+    color: var(--white);
+  }
+
+  .c-sub { font-size: 0.85rem; color: var(--text-muted); }
+
+  form { display: flex; flex-direction: column; gap: 1rem; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--gray-mid);
+    border: 1px solid var(--gray-light);
+    color: var(--white);
+    padding: 0.85rem 1rem;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--text-muted); }
+  input:focus, textarea:focus, select:focus { border-color: var(--cyan); }
+
+  textarea { resize: vertical; min-height: 130px; }
+
+  select option { background: #1c1c1c; }
+
+  .form-submit {
+    background: var(--cyan);
+    color: var(--black);
+    border: none;
+    padding: 1rem 2rem;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .form-submit:hover { background: var(--cyan-dark); transform: translateY(-1px); }
+
+  .form-msg {
+    display: none;
+    background: rgba(0,212,232,0.12);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 3px;
+    margin-top: 0.5rem;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--gray-dark);
+    border-top: 1px solid var(--gray-light);
+    padding: 3rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+  }
+
+  .footer-logo span { color: var(--cyan); }
+
+  .footer-copy {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .footer-slogan {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* SCROLL ANIMATIONS */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span>FORNI</span> CAR</div>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#revisiones">Revisiones</a></li>
+    <li><a href="#neumaticos">Neumáticos</a></li>
+    <li><a href="#tienda">Tienda</a></li>
+    <li><a href="#nosotros">Nosotros</a></li>
+    <li><a href="#contacto" class="nav-cta">Cita Previa</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="dot-grid"></div>
+  <div class="stripe-bar"></div>
+  <div class="stripe-bar-top"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">Taller Mecánico · Madrid</div>
+    <h1 class="hero-title">
+      <span class="line1">FORNI</span><br>
+      <span class="line2">CAR</span>
+    </h1>
+    <p class="hero-slogan"><em>Sin fallos al acelerar.</em> Tu coche en las mejores manos.</p>
+    <div class="hero-btns">
+      <a href="#contacto" class="btn-primary">Pedir Cita</a>
+      <a href="#servicios" class="btn-outline">Ver Servicios</a>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Especialistas</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">99€</div>
+      <div class="stat-label">Revisión Básica</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">M-404</div>
+      <div class="stat-label">Zona de Servicio</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="reveal">
+    <div class="section-label">Nuestros Servicios</div>
+    <h2 class="section-title">Todo lo que tu coche necesita</h2>
+    <p class="section-sub">Ofrecemos un servicio completo con precios transparentes. Sin sorpresas, sin fallos.</p>
+  </div>
+
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="svc-icon">🔧</div>
+      <div class="svc-title">Mecánica General</div>
+      <p class="svc-desc">Revisión completa del motor, frenos, suspensión y sistemas eléctricos. Diagnóstico profesional incluido.</p>
+      <div class="svc-price">Desde 50€ <small>/ hora</small></div>
+    </div>
+    <div class="service-card">
+      <div class="svc-icon">🛢️</div>
+      <div class="svc-title">Cambio de Aceite</div>
+      <p class="svc-desc">Cambio de aceite y filtro con productos de alta calidad. Reseteo del indicador incluido.</p>
+      <div class="svc-price">Incluido <small>en revisiones</small></div>
+    </div>
+    <div class="service-card">
+      <div class="svc-icon">🛑</div>
+      <div class="svc-title">Sistema de Frenos</div>
+      <p class="svc-desc">Cambio de pastillas, discos y líquido de frenos. Seguridad ante todo.</p>
+      <div class="svc-price">Consultar <small>precio</small></div>
+    </div>
+    <div class="service-card">
+      <div class="svc-icon">🔋</div>
+      <div class="svc-title">Sistema Eléctrico</div>
+      <p class="svc-desc">Diagnóstico y reparación de averías eléctricas, batería, alternador y arranque.</p>
+      <div class="svc-price">Consultar <small>precio</small></div>
+    </div>
+    <div class="service-card">
+      <div class="svc-icon">🌡️</div>
+      <div class="svc-title">Climatización</div>
+      <p class="svc-desc">Recarga de aire acondicionado, revisión del sistema de refrigeración y calefacción.</p>
+      <div class="svc-price">Consultar <small>precio</small></div>
+    </div>
+    <div class="service-card">
+      <div class="svc-icon">🔍</div>
+      <div class="svc-title">Diagnóstico OBD</div>
+      <p class="svc-desc">Lectura y reseteo de errores del ordenador de a bordo. Detectamos el problema antes de reparar.</p>
+      <div class="svc-price">Desde 30€</div>
+    </div>
+  </div>
+</section>
+
+<!-- REVISIONES -->
+<section id="revisiones">
+  <div class="reveal">
+    <div class="section-label">Packs de Revisión</div>
+    <h2 class="section-title">Elige tu revisión</h2>
+    <p class="section-sub">Dos opciones claras para mantener tu vehículo en perfecto estado todo el año.</p>
+  </div>
+
+  <div class="rev-container reveal">
+    <div class="rev-card">
+      <div class="rev-badge">Revisión Estándar</div>
+      <div class="rev-title">Lo Esencial</div>
+      <p class="rev-desc">Todo lo básico para mantener tu coche a punto.</p>
+      <div class="rev-price">99€</div>
+      <ul class="inc-list">
+        <li class="inc-item">Relleno de líquidos</li>
+        <li class="inc-item">Cambio de aceite</li>
+        <li class="inc-item">Filtro de aceite</li>
+        <li class="inc-item">Filtro de habitáculo</li>
+        <li class="inc-item">Reseteo del indicador de revisión</li>
+      </ul>
+    </div>
+    <div class="rev-card featured">
+      <div class="rev-badge">Más Popular</div>
+      <div class="rev-title">Todo Incluido</div>
+      <p class="rev-desc">La revisión completa para conductores exigentes.</p>
+      <div class="rev-price">179€</div>
+      <ul class="inc-list">
+        <li class="inc-item">Relleno de líquidos</li>
+        <li class="inc-item">Cambio de aceite</li>
+        <li class="inc-item">Filtro de aceite</li>
+        <li class="inc-item">Filtro de habitáculo</li>
+        <li class="inc-item">Filtro de aire</li>
+        <li class="inc-item">Líquido de frenos</li>
+        <li class="inc-item">Reseteo del indicador de revisión</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NEUMÁTICOS -->
+<section id="neumaticos">
+  <div class="reveal">
+    <div class="section-label">Neumáticos</div>
+    <h2 class="section-title">La base de tu seguridad</h2>
+    <p class="section-sub">Trabajamos con las mejores marcas del mercado. Montaje incluido en todos los pedidos.</p>
+  </div>
+
+  <div class="tyre-grid reveal">
+    <div class="tyre-card">
+      <div class="tyre-brand">Goldyear Eagle</div>
+      <div class="tyre-tag">Gama Económica</div>
+      <ul class="tyre-features">
+        <li>Barato y funcional</li>
+        <li>Ideal para ciudad</li>
+        <li>Gran relación calidad/precio</li>
+      </ul>
+      <div class="tyre-price">75€ <span>+ 16€ montaje</span></div>
+    </div>
+    <div class="tyre-card">
+      <div class="tyre-brand">Continental</div>
+      <div class="tyre-tag">Gama Media</div>
+      <ul class="tyre-features">
+        <li>Menor ruido de conducción</li>
+        <li>Mayor autonomía</li>
+        <li>Durabilidad superior</li>
+      </ul>
+      <div class="tyre-price">86€ <span>+ 16€ montaje</span></div>
+    </div>
+    <div class="tyre-card">
+      <div class="tyre-brand">Michelin Primacy 5</div>
+      <div class="tyre-tag">Gama Premium</div>
+      <ul class="tyre-features">
+        <li>Máxima adherencia</li>
+        <li>Eficiencia en mojado</li>
+        <li>Garantía extendida</li>
+      </ul>
+      <div class="tyre-price">139€ <span>+ 16€ montaje</span></div>
+    </div>
+  </div>
+
+  <!-- Láminas -->
+  <div style="margin-top: 4rem;" class="reveal">
+    <div class="section-label">Láminas para Cristales</div>
+    <h3 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; margin-bottom:1rem;">Protección Premium</h3>
+    <div style="display:flex; gap:2rem; flex-wrap:wrap; margin-top:1.5rem;">
+      <div style="border:1px solid var(--gray-light); padding:1.5rem 2rem; flex:1; min-width:200px;">
+        <div style="font-size:0.7rem; color:var(--cyan); font-weight:700; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem;">Protección UV</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--white);">99<span style="font-size:1.5rem">%</span></div>
+      </div>
+      <div style="border:1px solid var(--gray-light); padding:1.5rem 2rem; flex:1; min-width:200px;">
+        <div style="font-size:0.7rem; color:var(--cyan); font-weight:700; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem;">Rechazo de Calor</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--white);">88<span style="font-size:1.5rem">%</span></div>
+      </div>
+      <div style="border:1px solid var(--gray-light); padding:1.5rem 2rem; flex:1; min-width:200px;">
+        <div style="font-size:0.7rem; color:var(--cyan); font-weight:700; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem;">Garantía</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--white);">12<span style="font-size:1.5rem"> años</span></div>
+      </div>
+      <div style="border:2px solid var(--cyan); padding:1.5rem 2rem; flex:1; min-width:200px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="font-size:0.7rem; color:var(--cyan); font-weight:700; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem;">Tecnología Nanocerámica</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:2.8rem; color:var(--cyan);">349,99€</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIENDA -->
+<section id="tienda">
+  <div class="reveal">
+    <div class="section-label">Tienda</div>
+    <h2 class="section-title">Recambios y Accesorios</h2>
+    <p class="section-sub">Todo lo que necesitas para tu vehículo, disponible en nuestro taller.</p>
+  </div>
+
+  <div class="shop-grid reveal">
+    <div class="shop-item">
+      <div class="shop-emoji">💡</div>
+      <div class="shop-name">Bombillas</div>
+      <div class="shop-price">4,99€ – 19,99€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">🌧️</div>
+      <div class="shop-name">Limpiaparabrisas</div>
+      <div class="shop-price">15€ – 30€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">🔺</div>
+      <div class="shop-name">Baliza V16</div>
+      <div class="shop-price">29,99€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">🚲</div>
+      <div class="shop-name">Portabicis</div>
+      <div class="shop-price">249,99€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">🏎️</div>
+      <div class="shop-name">Kit Alfombrillas</div>
+      <div class="shop-price">19,99€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">⚡</div>
+      <div class="shop-name">Pinzas Batería</div>
+      <div class="shop-price">29,99€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">🌸</div>
+      <div class="shop-name">Ambientador</div>
+      <div class="shop-price">3,99€</div>
+    </div>
+    <div class="shop-item">
+      <div class="shop-emoji">💨</div>
+      <div class="shop-name">Inflador de Ruedas</div>
+      <div class="shop-price">19,99€</div>
+    </div>
+  </div>
+</section>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="about-img-wrap reveal">
+    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80" alt="Taller Forni Car" class="about-img">
+    <div class="about-accent"></div>
+  </div>
+  <div class="reveal">
+    <div class="about-tag-inline">¿Quiénes somos?</div>
+    <h2 class="section-title">Entusiasmo por crecer</h2>
+    <p class="section-sub" style="margin-bottom:1.5rem;">Somos un equipo de emprendedores con mucho entusiasmo. Con nuestro taller, queremos ayudar a la gente y dar un servicio de calidad a precios accesibles.</p>
+    <p class="section-sub">Ubicados en <strong style="color:var(--white)">Calle de Píndaro Nº 10</strong>, en una zona con alta concentración de viviendas y sin competencia cercana, listos para ser tu taller de confianza.</p>
+
+    <div class="team-list">
+      <div class="team-pill">Diego<strong>Mecánico Jefe</strong></div>
+      <div class="team-pill">Luis<strong>Ayudante Mecánico</strong></div>
+      <div class="team-pill">David<strong>Contable</strong></div>
+      <div class="team-pill">Carlos<strong>Marketing</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="reveal">
+    <div class="section-label">Contacto</div>
+    <h2 class="section-title">Pide tu cita</h2>
+    <p class="section-sub">Rellena el formulario y te contactamos en menos de 24 horas para confirmar tu cita.</p>
+  </div>
+
+  <div class="contact-wrap">
+    <div class="contact-info reveal">
+      <div class="c-item">
+        <div class="c-label">📍 Dirección</div>
+        <div class="c-value">Calle de Píndaro, Nº 10</div>
+        <div class="c-sub">Madrid · Zona M-404</div>
+      </div>
+      <div class="c-item">
+        <div class="c-label">🕐 Horario</div>
+        <div class="c-value">Lun – Vie: 8:00 – 20:00</div>
+        <div class="c-sub">Sábados: 9:00 – 14:00</div>
+      </div>
+      <div class="c-item">
+        <div class="c-label">📞 Teléfono</div>
+        <div class="c-value">+34 600 000 000</div>
+      </div>
+      <div class="c-item">
+        <div class="c-label">✉️ Email</div>
+        <div class="c-value">info@forni-car.es</div>
+      </div>
+    </div>
+
+    <form class="reveal" id="cita-form">
+      <div class="form-row">
+        <input type="text" placeholder="Nombre" required>
+        <input type="tel" placeholder="Teléfono" required>
+      </div>
+      <input type="email" placeholder="Email">
+      <select>
+        <option value="" disabled selected>Tipo de servicio</option>
+        <option>Revisión Estándar (99€)</option>
+        <option>Revisión Todo Incluido (179€)</option>
+        <option>Neumáticos</option>
+        <option>Frenos</option>
+        <option>Diagnóstico OBD</option>
+        <option>Láminas de cristal</option>
+        <option>Otro</option>
+      </select>
+      <input type="date" min="">
+      <textarea placeholder="Describe el problema o añade información sobre tu vehículo (marca, modelo, año)…"></textarea>
+      <button type="submit" class="form-submit">Solicitar Cita →</button>
+      <div class="form-msg" id="form-msg">✓ Solicitud enviada. Te contactaremos en breve.</div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><span>FORNI</span> CAR</div>
+  <div class="footer-slogan">"Forni Car, sin fallos al acelerar."</div>
+  <div class="footer-copy">© 2026 Forni Car · Calle de Píndaro Nº 10, Madrid</div>
+</footer>
+
+<script>
+  // Intersection Observer for scroll reveals
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        e.target.style.transitionDelay = (i % 3) * 0.08 + 's';
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => io.observe(r));
+
+  // Set min date for date input
+  const dateInput = document.querySelector('input[type="date"]');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+  }
+
+  // Form submit
+  document.getElementById('cita-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const msg = document.getElementById('form-msg');
+    msg.style.display = 'block';
+    this.reset();
+    setTimeout(() => { msg.style.display = 'none'; }, 5000);
+  });
+
+  // Nav active highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY + 100;
+    sections.forEach(s => {
+      const top = s.offsetTop;
+      const h = s.offsetHeight;
+      const id = s.getAttribute('id');
+      const link = document.querySelector(`.nav-links a[href="#${id}"]`);
+      if (link) {
+        if (scrollY >= top && scrollY < top + h) {
+          link.style.color = 'var(--cyan)';
+        } else {
+          link.style.color = '';
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
